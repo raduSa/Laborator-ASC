@@ -16,6 +16,7 @@ main:
 push $m
 push $fs
 call scanf
+
 add $8, %esp
 
 push $n
@@ -98,7 +99,6 @@ jmp for_col
 
 nxt_line:
 
-inc %eax
 xor %esi, %esi
 inc %ecx
 
