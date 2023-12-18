@@ -131,6 +131,14 @@ pop %eax
 jmp for_line
 
 fin_afisare:
+// inca un endline
+push $newLine
+call printf
+add $4, %esp
+
+push $0
+call fflush
+pop %ebx
 
 
 
@@ -192,8 +200,9 @@ je next_line
 
 // calculez in ebx suma celor 8 vecini
 xor %ebx, %ebx
-push %eax
+
 push %ecx
+push %eax
 
 mov %eax, %ecx
 lea (%edi, %ecx, 4), %eax
@@ -222,13 +231,48 @@ add (%eax), %ebx
 add $4, %eax
 add (%eax), %ebx
 
-pop %ecx
 pop %eax
 
 // trecem in noua matrice
 
+// verificare daca celula e moarta
+lea (%edi, %eax, 4), %ecx
+cmpl $0, (%ecx)
+je cel_moarta
 
+cel_vie:
+lea (%esi, %eax, 4), %ecx
 
+cmp $2, %ebx
+je ramane_vie
+cmp $3, %ebx
+je ramane_vie
+movl $0, (%ecx)
+jmp skip_ramane_vie
+
+ramane_vie:
+movl $1, (%ecx)
+
+skip_ramane_vie:
+
+jmp skip_cel_moarta
+
+cel_moarta:
+lea (%esi, %eax, 4), %ecx
+
+cmp $3, %ebx
+jne ramane_moarta
+movl $1, (%ecx)
+jmp skip_ramane_moarta
+
+ramane_moarta:
+movl $0, (%ecx)
+
+skip_ramane_moarta:
+
+skip_cel_moarta:
+
+pop %ecx
 
 inc %edx
 inc %eax
