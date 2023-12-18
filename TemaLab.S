@@ -12,7 +12,92 @@ fs: .asciz "%d"
 fp: .asciz "%d "
 newLine: .asciz "\n"
 
+
+
+
 .text
+
+// afisare matrice
+afisare:
+mov 4(%esp), %edi
+// sar la primul elem
+mov n, %eax
+add $3, %eax
+xor %edx, %edx
+mov $4, %ebx
+mul %ebx
+add %eax, %edi
+
+xor %ecx, %ecx
+xor %esi, %esi
+xor %eax, %eax
+
+for_line:
+mov m, %ebx
+cmp %ecx, %ebx 
+je fin_afisare
+
+for_col:
+mov n, %ebx
+cmp %esi, %ebx
+je nxt_line
+
+lea (%edi, %eax, 4), %ebx
+push %eax
+push %ecx
+
+push (%ebx)
+push $fp
+call printf
+add $8, %esp
+
+push $0
+call fflush
+pop %ebx
+
+pop %ecx
+pop %eax
+
+inc %eax
+inc %esi
+
+jmp for_col
+
+nxt_line:
+
+xor %esi, %esi
+add $2, %eax
+inc %ecx
+
+push %eax
+push %ecx
+
+push $newLine
+call printf
+add $4, %esp
+
+push $0
+call fflush
+pop %ebx
+
+pop %ecx
+pop %eax
+jmp for_line
+
+fin_afisare:
+// inca un endline
+push $newLine
+call printf
+add $4, %esp
+
+push $0
+call fflush
+pop %ebx
+ret
+
+
+
+
 .global main
 main:
 // citire var
@@ -35,6 +120,8 @@ add $8, %esp
 
 // populare cu puncte
 mov p, %ecx
+cmp $0, %ecx
+je skip_populare
 
 et_loop:
 push %ecx
@@ -66,79 +153,12 @@ movl $1, (%edi, %eax, 4)
 
 loop et_loop
 
+skip_populare:
 
-
-// afisare matrice
-afisare:
-lea matrix, %edi
-xor %ecx, %ecx
-xor %esi, %esi
-xor %eax, %eax
-
-for_line:
-// maresc cu 2 nr de linii
-mov m, %ebx
-add $2, %ebx
-cmp %ecx, %ebx 
-je fin_afisare
-
-for_col:
-// maresc cu 2 nr de col
-mov n, %ebx
-add $2, %ebx
-cmp %esi, %ebx
-je nxt_line
-
-lea (%edi, %eax, 4), %ebx
-push %eax
-push %ecx
-
-push (%ebx)
-push $fp
-call printf
-add $8, %esp
-
-push $0
-call fflush
-pop %ebx
-
-pop %ecx
-pop %eax
-
-inc %eax
-inc %esi
-
-jmp for_col
-
-nxt_line:
-
-xor %esi, %esi
-inc %ecx
-
-push %eax
-push %ecx
-
-push $newLine
-call printf
+// afisare matrice originala
+push $matrix
+call afisare
 add $4, %esp
-
-push $0
-call fflush
-pop %ebx
-
-pop %ecx
-pop %eax
-jmp for_line
-
-fin_afisare:
-// inca un endline
-push $newLine
-call printf
-add $4, %esp
-
-push $0
-call fflush
-pop %ebx
 
 
 
@@ -149,7 +169,6 @@ push $fs
 call scanf
 add $8, %esp
 mov k, %ecx
-
 
 
 for_ev:
@@ -285,6 +304,16 @@ inc %ecx
 jmp for_l
 
 fin_ev:
+// afisare noua gen
+mov n, %eax
+add $3, %eax
+xor %edx, %edx
+mov $4, %ebx
+mul %ebx
+sub %eax, %esi
+push %esi
+call afisare
+add $4, %esp
 
 pop %ecx
 dec %ecx
