@@ -8,8 +8,15 @@ k: .space 4
 left: .space 4
 right: .space 4
 check: .long 1
+mSize: .space 4
+cript: .space 4
+sir: .space 11
+res: .space 22 // ?
 fs: .asciz "%d"
 fp: .asciz "%d "
+fstring: .asciz "%s"
+fcriptat: .asciz "0x"
+fhex: .asciz "%X"
 newLine: .asciz "\n"
 
 
@@ -321,6 +328,123 @@ jmp for_ev
 
 exit_ev:
 
+
+
+
+// citire noi variabile
+push $cript
+push $fs
+call scanf
+add $8, %esp
+
+// check = 1 -> matrix, 0 -> newMatrix
+mov check, %ebx
+cmpl $0, %ebx
+je altfel
+lea matrix, %edi
+jmp skip_altfel
+
+altfel:
+lea newMatrix, %edi
+
+skip_altfel:
+
+// calculez dimens matrice
+mov n, %eax
+add $2, %eax
+mov m, %ebx
+add $2, %ebx
+xor %edx, %edx
+mul %ebx
+movl %eax, mSize
+
+
+// alegere criptare/decriptare
+mov cript, %ebx
+cmpl $0, %ebx
+jne decriptare
+
+criptare:
+
+// citire sir caractere
+push $sir
+push $fstring
+call scanf
+add $8, %esp
+
+push $fcriptat
+call printf
+add $4, %esp
+
+push $0
+call fflush
+pop %ebx
+
+xor %ecx, %ecx
+
+for_litera:
+
+lea sir, %ebx 
+add %ecx, %ebx
+xor %eax, %eax
+mov (%ebx), %al
+cmp $0, %eax
+je fin_for_litera
+
+// formez cheia pt un caracter din sir in ebx
+xor %ebx, %ebx
+mov $8, %esi
+
+one_byte:
+
+push %edi
+lea (%edi, %edx, 4), %edi
+shl %ebx
+add (%edi), %ebx
+inc %edx
+cmp mSize, %edx
+jne cont
+xor %edx, %edx
+
+cont:
+pop %edi
+dec %esi
+cmp $0, %esi
+jne one_byte
+
+tester:
+
+xor %bl, %al
+
+push %ecx
+push %edx
+
+push %eax
+push $fhex
+call printf
+add $8, %esp
+
+push $0
+call fflush
+pop %ebx
+
+pop %edx
+pop %ecx
+
+inc %ecx
+jmp for_litera
+
+
+fin_for_litera:
+jmp skip_decriptare
+
+decriptare:
+
+skip_decriptare:
+
+push $newLine
+call printf
+add $4, %esp
 
 mov $1, %eax
 mov $0, %ebx
