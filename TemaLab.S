@@ -10,14 +10,16 @@ right: .space 4
 check: .long 1
 mSize: .space 4
 cript: .space 4
-sir: .space 11
+sir: .space 24
 res: .space 22 // ?
 fs: .asciz "%d"
 fp: .asciz "%d "
 fstring: .asciz "%s"
 fcriptat: .asciz "0x"
 fhex: .asciz "%X"
+fchar: .asciz "%c"
 newLine: .asciz "\n"
+terminator: .asciz "\0\n"
 
 
 
@@ -381,6 +383,7 @@ call fflush
 pop %ebx
 
 xor %ecx, %ecx
+xor %edx, %edx
 
 for_litera:
 
@@ -411,8 +414,6 @@ pop %edi
 dec %esi
 cmp $0, %esi
 jne one_byte
-
-tester:
 
 xor %bl, %al
 
@@ -456,30 +457,117 @@ jmp for_litera
 fin_for_litera:
 jmp skip_decriptare
 
+
+
 decriptare:
 
-// citire numar hexa
+// citire sir caractere
 push $sir
-push $fhex
+push $fstring
 call scanf
 add $8, %esp
 
+xor %ecx, %ecx
+xor %edx, %edx
 
+for_byte:
 
+tester:
 
+push %edx
 
+// iau primul caracter
+lea sir, %ebx 
+lea 2(%ebx, %ecx, 2), %ebx
+xor %eax, %eax
+mov (%ebx), %al
+cmp $0, %eax
+je fin_for_byte
 
+// transform codul ascii in nr in baza 10
+cmp $64, %eax
+ja letter
+sub $48, %eax
+jmp skip_letter
 
+letter:
+sub $55, %eax
+skip_letter:
+
+// fac loc pt al doilea caracter
+shl $4, %eax
+
+// adaug al doilea caracter
+lea sir, %ebx 
+lea 3(%ebx, %ecx, 2), %ebx
+xor %edx, %edx
+mov (%ebx), %dl
+
+cmp $64, %edx
+ja letter_2
+sub $48, %edx
+jmp skip_letter_2
+
+letter_2:
+sub $55, %edx
+skip_letter_2:
+
+add %edx, %eax
+
+pop %edx
+
+// formez cheia pt un caracter din sir in ebx
+xor %ebx, %ebx
+mov $8, %esi
+
+one_byte_nd:
+
+push %edi
+lea (%edi, %edx, 4), %edi
+shl %ebx
+add (%edi), %ebx
+inc %edx
+cmp mSize, %edx
+jne cont_nd
+xor %edx, %edx
+
+cont_nd:
+pop %edi
+dec %esi
+cmp $0, %esi
+jne one_byte_nd
+
+xor %bl, %al
+
+push %ecx
+push %edx
+
+push %eax
+push $fchar
+call printf
+add $8, %esp
+
+push $0
+call fflush
+add $4, %esp
+
+pop %edx
+pop %ecx
+
+inc %ecx
+
+jmp for_byte
+
+fin_for_byte:
 skip_decriptare:
 
-push $newLine
+push $terminator
 call printf
 add $4, %esp
 
 mov $1, %eax
 mov $0, %ebx
 int $0x80
-
 
 
 
