@@ -419,6 +419,24 @@ xor %bl, %al
 push %ecx
 push %edx
 
+cmp $16, %al
+ja skip_extra_zero
+
+push %eax
+
+push $0
+push $fhex
+call printf
+add $8, %esp
+
+push $0
+call fflush
+pop %ebx
+
+pop %eax
+
+skip_extra_zero:
+
 push %eax
 push $fhex
 call printf
@@ -439,6 +457,18 @@ fin_for_litera:
 jmp skip_decriptare
 
 decriptare:
+
+// citire numar hexa
+push $sir
+push $fhex
+call scanf
+add $8, %esp
+
+
+
+
+
+
 
 skip_decriptare:
 
